@@ -10,33 +10,128 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as CitiesRouteImport } from './routes/cities'
+import { Route as CountriesRouteImport } from './routes/countries'
+import { Route as GroupsRouteImport } from './routes/groups'
+import { Route as InvoicesRouteImport } from './routes/invoices'
+import { Route as SettingsRouteImport } from './routes/settings'
+import { Route as UsersRouteImport } from './routes/users'
+import { Route as VacationsRouteImport } from './routes/vacations'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CitiesRoute = CitiesRouteImport.update({
+  id: '/cities',
+  path: '/cities',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CountriesRoute = CountriesRouteImport.update({
+  id: '/countries',
+  path: '/countries',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GroupsRoute = GroupsRouteImport.update({
+  id: '/groups',
+  path: '/groups',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const InvoicesRoute = InvoicesRouteImport.update({
+  id: '/invoices',
+  path: '/invoices',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SettingsRoute = SettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const UsersRoute = UsersRouteImport.update({
+  id: '/users',
+  path: '/users',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const VacationsRoute = VacationsRouteImport.update({
+  id: '/vacations',
+  path: '/vacations',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/cities': typeof CitiesRoute
+  '/countries': typeof CountriesRoute
+  '/groups': typeof GroupsRoute
+  '/invoices': typeof InvoicesRoute
+  '/settings': typeof SettingsRoute
+  '/users': typeof UsersRoute
+  '/vacations': typeof VacationsRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/cities': typeof CitiesRoute
+  '/countries': typeof CountriesRoute
+  '/groups': typeof GroupsRoute
+  '/invoices': typeof InvoicesRoute
+  '/settings': typeof SettingsRoute
+  '/users': typeof UsersRoute
+  '/vacations': typeof VacationsRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/cities': typeof CitiesRoute
+  '/countries': typeof CountriesRoute
+  '/groups': typeof GroupsRoute
+  '/invoices': typeof InvoicesRoute
+  '/settings': typeof SettingsRoute
+  '/users': typeof UsersRoute
+  '/vacations': typeof VacationsRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/cities'
+    | '/countries'
+    | '/groups'
+    | '/invoices'
+    | '/settings'
+    | '/users'
+    | '/vacations'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/cities'
+    | '/countries'
+    | '/groups'
+    | '/invoices'
+    | '/settings'
+    | '/users'
+    | '/vacations'
+  id:
+    | '__root__'
+    | '/'
+    | '/cities'
+    | '/countries'
+    | '/groups'
+    | '/invoices'
+    | '/settings'
+    | '/users'
+    | '/vacations'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  CitiesRoute: typeof CitiesRoute
+  CountriesRoute: typeof CountriesRoute
+  GroupsRoute: typeof GroupsRoute
+  InvoicesRoute: typeof InvoicesRoute
+  SettingsRoute: typeof SettingsRoute
+  UsersRoute: typeof UsersRoute
+  VacationsRoute: typeof VacationsRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -48,11 +143,67 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/cities': {
+      id: '/cities'
+      path: '/cities'
+      fullPath: '/cities'
+      preLoaderRoute: typeof CitiesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/countries': {
+      id: '/countries'
+      path: '/countries'
+      fullPath: '/countries'
+      preLoaderRoute: typeof CountriesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/groups': {
+      id: '/groups'
+      path: '/groups'
+      fullPath: '/groups'
+      preLoaderRoute: typeof GroupsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/invoices': {
+      id: '/invoices'
+      path: '/invoices'
+      fullPath: '/invoices'
+      preLoaderRoute: typeof InvoicesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/settings': {
+      id: '/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof SettingsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/users': {
+      id: '/users'
+      path: '/users'
+      fullPath: '/users'
+      preLoaderRoute: typeof UsersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/vacations': {
+      id: '/vacations'
+      path: '/vacations'
+      fullPath: '/vacations'
+      preLoaderRoute: typeof VacationsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  CitiesRoute: CitiesRoute,
+  CountriesRoute: CountriesRoute,
+  GroupsRoute: GroupsRoute,
+  InvoicesRoute: InvoicesRoute,
+  SettingsRoute: SettingsRoute,
+  UsersRoute: UsersRoute,
+  VacationsRoute: VacationsRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
