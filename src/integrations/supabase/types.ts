@@ -14,6 +14,39 @@ export type Database = {
   }
   public: {
     Tables: {
+      counterparty: {
+        Row: {
+          active: boolean
+          comment: string | null
+          contact_person: string | null
+          created_at: string
+          id: number
+          name: string
+          phone: string | null
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          comment?: string | null
+          contact_person?: string | null
+          created_at?: string
+          id?: never
+          name: string
+          phone?: string | null
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          comment?: string | null
+          contact_person?: string | null
+          created_at?: string
+          id?: never
+          name?: string
+          phone?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       groups: {
         Row: {
           comment: string | null

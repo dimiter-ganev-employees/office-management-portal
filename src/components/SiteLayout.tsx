@@ -7,6 +7,7 @@ const settingsLinks = [
   { to: "/users", label: "Потребители" },
   { to: "/cities", label: "Град" },
   { to: "/countries", label: "Държава" },
+  { to: "/counterparty", label: "Контрагент" },
 ] as const;
 
 const navCls = "rounded-md px-3 py-2 text-sm font-medium text-muted-foreground hover:bg-accent hover:text-foreground";
