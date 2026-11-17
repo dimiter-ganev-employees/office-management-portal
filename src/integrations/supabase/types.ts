@@ -47,6 +47,44 @@ export type Database = {
         }
         Relationships: []
       }
+      deliveries: {
+        Row: {
+          amount: number
+          created_at: string
+          delivery_date: string
+          from_cash: boolean
+          id: number
+          supplier_id: number
+          updated_at: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          delivery_date?: string
+          from_cash?: boolean
+          id?: never
+          supplier_id: number
+          updated_at?: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          delivery_date?: string
+          from_cash?: boolean
+          id?: never
+          supplier_id?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "deliveries_supplier_id_fkey"
+            columns: ["supplier_id"]
+            isOneToOne: false
+            referencedRelation: "counterparty"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       groups: {
         Row: {
           comment: string | null

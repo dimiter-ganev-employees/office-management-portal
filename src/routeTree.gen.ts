@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as CashRouteImport } from './routes/cash'
 import { Route as CitiesRouteImport } from './routes/cities'
 import { Route as CounterpartyRouteImport } from './routes/counterparty'
 import { Route as CountriesRouteImport } from './routes/countries'
@@ -22,6 +23,11 @@ import { Route as VacationsRouteImport } from './routes/vacations'
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CashRoute = CashRouteImport.update({
+  id: '/cash',
+  path: '/cash',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CitiesRoute = CitiesRouteImport.update({
@@ -67,6 +73,7 @@ const VacationsRoute = VacationsRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/cash': typeof CashRoute
   '/cities': typeof CitiesRoute
   '/counterparty': typeof CounterpartyRoute
   '/countries': typeof CountriesRoute
@@ -78,6 +85,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/cash': typeof CashRoute
   '/cities': typeof CitiesRoute
   '/counterparty': typeof CounterpartyRoute
   '/countries': typeof CountriesRoute
@@ -90,6 +98,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/cash': typeof CashRoute
   '/cities': typeof CitiesRoute
   '/counterparty': typeof CounterpartyRoute
   '/countries': typeof CountriesRoute
@@ -103,6 +112,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/cash'
     | '/cities'
     | '/counterparty'
     | '/countries'
@@ -114,6 +124,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/cash'
     | '/cities'
     | '/counterparty'
     | '/countries'
@@ -125,6 +136,7 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/cash'
     | '/cities'
     | '/counterparty'
     | '/countries'
@@ -137,6 +149,7 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  CashRoute: typeof CashRoute
   CitiesRoute: typeof CitiesRoute
   CounterpartyRoute: typeof CounterpartyRoute
   CountriesRoute: typeof CountriesRoute
@@ -154,6 +167,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/cash': {
+      id: '/cash'
+      path: '/cash'
+      fullPath: '/cash'
+      preLoaderRoute: typeof CashRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/cities': {
@@ -217,6 +237,7 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  CashRoute: CashRoute,
   CitiesRoute: CitiesRoute,
   CounterpartyRoute: CounterpartyRoute,
   CountriesRoute: CountriesRoute,
