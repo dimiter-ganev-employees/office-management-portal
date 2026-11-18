@@ -16,6 +16,7 @@ import { Route as CounterpartyRouteImport } from './routes/counterparty'
 import { Route as CountriesRouteImport } from './routes/countries'
 import { Route as GroupsRouteImport } from './routes/groups'
 import { Route as InvoicesRouteImport } from './routes/invoices'
+import { Route as ProblemsRouteImport } from './routes/problems'
 import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as UsersRouteImport } from './routes/users'
 import { Route as VacationsRouteImport } from './routes/vacations'
@@ -55,6 +56,11 @@ const InvoicesRoute = InvoicesRouteImport.update({
   path: '/invoices',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ProblemsRoute = ProblemsRouteImport.update({
+  id: '/problems',
+  path: '/problems',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SettingsRoute = SettingsRouteImport.update({
   id: '/settings',
   path: '/settings',
@@ -79,6 +85,7 @@ export interface FileRoutesByFullPath {
   '/countries': typeof CountriesRoute
   '/groups': typeof GroupsRoute
   '/invoices': typeof InvoicesRoute
+  '/problems': typeof ProblemsRoute
   '/settings': typeof SettingsRoute
   '/users': typeof UsersRoute
   '/vacations': typeof VacationsRoute
@@ -91,6 +98,7 @@ export interface FileRoutesByTo {
   '/countries': typeof CountriesRoute
   '/groups': typeof GroupsRoute
   '/invoices': typeof InvoicesRoute
+  '/problems': typeof ProblemsRoute
   '/settings': typeof SettingsRoute
   '/users': typeof UsersRoute
   '/vacations': typeof VacationsRoute
@@ -104,6 +112,7 @@ export interface FileRoutesById {
   '/countries': typeof CountriesRoute
   '/groups': typeof GroupsRoute
   '/invoices': typeof InvoicesRoute
+  '/problems': typeof ProblemsRoute
   '/settings': typeof SettingsRoute
   '/users': typeof UsersRoute
   '/vacations': typeof VacationsRoute
@@ -118,6 +127,7 @@ export interface FileRouteTypes {
     | '/countries'
     | '/groups'
     | '/invoices'
+    | '/problems'
     | '/settings'
     | '/users'
     | '/vacations'
@@ -130,6 +140,7 @@ export interface FileRouteTypes {
     | '/countries'
     | '/groups'
     | '/invoices'
+    | '/problems'
     | '/settings'
     | '/users'
     | '/vacations'
@@ -142,6 +153,7 @@ export interface FileRouteTypes {
     | '/countries'
     | '/groups'
     | '/invoices'
+    | '/problems'
     | '/settings'
     | '/users'
     | '/vacations'
@@ -155,6 +167,7 @@ export interface RootRouteChildren {
   CountriesRoute: typeof CountriesRoute
   GroupsRoute: typeof GroupsRoute
   InvoicesRoute: typeof InvoicesRoute
+  ProblemsRoute: typeof ProblemsRoute
   SettingsRoute: typeof SettingsRoute
   UsersRoute: typeof UsersRoute
   VacationsRoute: typeof VacationsRoute
@@ -211,6 +224,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof InvoicesRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/problems': {
+      id: '/problems'
+      path: '/problems'
+      fullPath: '/problems'
+      preLoaderRoute: typeof ProblemsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/settings': {
       id: '/settings'
       path: '/settings'
@@ -243,6 +263,7 @@ const rootRouteChildren: RootRouteChildren = {
   CountriesRoute: CountriesRoute,
   GroupsRoute: GroupsRoute,
   InvoicesRoute: InvoicesRoute,
+  ProblemsRoute: ProblemsRoute,
   SettingsRoute: SettingsRoute,
   UsersRoute: UsersRoute,
   VacationsRoute: VacationsRoute,

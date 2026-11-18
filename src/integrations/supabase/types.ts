@@ -109,6 +109,33 @@ export type Database = {
         }
         Relationships: []
       }
+      problems: {
+        Row: {
+          active: boolean
+          comment: string | null
+          created_at: string
+          id: number
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          comment?: string | null
+          created_at?: string
+          id?: number
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          comment?: string | null
+          created_at?: string
+          id?: number
+          name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
