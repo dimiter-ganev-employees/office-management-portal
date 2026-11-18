@@ -114,6 +114,7 @@ export type Database = {
           active: boolean
           comment: string | null
           created_at: string
+          credit: boolean
           id: number
           name: string
           updated_at: string
@@ -122,6 +123,7 @@ export type Database = {
           active?: boolean
           comment?: string | null
           created_at?: string
+          credit?: boolean
           id?: number
           name: string
           updated_at?: string
@@ -130,6 +132,7 @@ export type Database = {
           active?: boolean
           comment?: string | null
           created_at?: string
+          credit?: boolean
           id?: number
           name?: string
           updated_at?: string

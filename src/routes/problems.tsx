@@ -37,9 +37,10 @@ type Row = {
   id: number;
   name: string;
   active: boolean;
+  credit: boolean;
   comment: string | null;
 };
-type Key = "id" | "name" | "active" | "comment";
+type Key = "id" | "name" | "active" | "credit" | "comment";
 type Dialog =
   | { mode: "add" }
   | { mode: "edit"; row: Row }
@@ -50,12 +51,17 @@ const cols: [Key, string][] = [
   ["id", "ID"],
   ["name", "Име"],
   ["active", "Активен"],
+  ["credit", "Кредит"],
   ["comment", "Коментар"],
 ];
 const inputCls =
   "w-full rounded-md border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring";
 const text = (row: Row, key: Key) =>
-  key === "active" ? (row.active ? "Да" : "Не") : String(row[key] ?? "");
+  key === "active" || key === "credit"
+    ? row[key]
+      ? "Да"
+      : "Не"
+    : String(row[key] ?? "");
 
 function ProblemsPage() {
   const [rows, setRows] = useState<Row[]>([]);
@@ -67,10 +73,16 @@ function ProblemsPage() {
     id: "",
     name: "",
     active: "",
+    credit: "",
     comment: "",
   });
   const [dialog, setDialog] = useState<Dialog>(null);
-  const [form, setForm] = useState({ name: "", active: true, comment: "" });
+  const [form, setForm] = useState({
+    name: "",
+    active: true,
+    credit: false,
+    comment: "",
+  });
   const [formError, setFormError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
 
@@ -78,7 +90,7 @@ function ProblemsPage() {
     setLoading(true);
     const { data, error: loadError } = await supabase
       .from("problems")
-      .select("id, name, active, comment")
+      .select("id, name, active, credit, comment")
       .order("id");
     if (loadError) setError(loadError.message);
     else {
@@ -97,7 +109,7 @@ function ProblemsPage() {
       cols.every(([key]) => {
         const query = filters[key].trim().toLowerCase();
         if (!query) return true;
-        if (key === "active") {
+        if (key === "active" || key === "credit") {
           const expected =
             query === "1" || query === "да"
               ? "Да"
@@ -112,8 +124,8 @@ function ProblemsPage() {
     const direction = asc ? 1 : -1;
     return [...filtered].sort((a, b) => {
       if (sortKey === "id") return (a.id - b.id) * direction;
-      if (sortKey === "active")
-        return (Number(a.active) - Number(b.active)) * direction;
+      if (sortKey === "active" || sortKey === "credit")
+        return (Number(a[sortKey]) - Number(b[sortKey])) * direction;
       return text(a, sortKey).localeCompare(text(b, sortKey), "bg") * direction;
     });
   }, [rows, filters, sortKey, asc]);
@@ -121,11 +133,12 @@ function ProblemsPage() {
   const open = (nextDialog: NonNullable<Dialog>) => {
     setFormError(null);
     if (nextDialog.mode === "add")
-      setForm({ name: "", active: true, comment: "" });
+      setForm({ name: "", active: true, credit: false, comment: "" });
     if (nextDialog.mode === "edit")
       setForm({
         name: nextDialog.row.name,
         active: nextDialog.row.active,
+        credit: nextDialog.row.credit,
         comment: nextDialog.row.comment ?? "",
       });
     setDialog(nextDialog);
@@ -138,6 +151,7 @@ function ProblemsPage() {
     const payload = {
       name,
       active: form.active,
+      credit: form.credit,
       comment: form.comment.trim() || null,
     };
     const result =
@@ -225,10 +239,12 @@ function ProblemsPage() {
             <tr className="border-b bg-muted/20">
               {cols.map(([key]) => (
                 <th key={key} className="px-3 py-2">
-                  {key === "active" ? (
+                  {key === "active" || key === "credit" ? (
                     <select
-                      aria-label="Филтър по Активен"
-                      value={filters.active}
+                      aria-label={`Филтър по ${
+                        cols.find(([column]) => column === key)?.[1]
+                      }`}
+                      value={filters[key]}
                       onChange={(event) =>
                         setFilters((current) => ({
                           ...current,
@@ -263,13 +279,13 @@ function ProblemsPage() {
           <tbody>
             {loading ? (
               <tr>
-                <td colSpan={5} className="px-4 py-8 text-center text-muted-foreground">
+                <td colSpan={6} className="px-4 py-8 text-center text-muted-foreground">
                   Зареждане...
                 </td>
               </tr>
             ) : visible.length === 0 ? (
               <tr>
-                <td colSpan={5} className="px-4 py-8 text-center text-muted-foreground">
+                <td colSpan={6} className="px-4 py-8 text-center text-muted-foreground">
                   Няма намерени проблеми.
                 </td>
               </tr>
@@ -287,6 +303,17 @@ function ProblemsPage() {
                       }`}
                     >
                       {row.active ? "Да" : "Не"}
+                    </span>
+                  </td>
+                  <td className="px-3 py-3">
+                    <span
+                      className={`rounded-full px-2 py-0.5 text-xs font-medium ${
+                        row.credit
+                          ? "bg-primary/10 text-primary"
+                          : "bg-muted text-muted-foreground"
+                      }`}
+                    >
+                      {row.credit ? "Да" : "Не"}
                     </span>
                   </td>
                   <td className="px-3 py-3 text-muted-foreground">
@@ -408,6 +435,22 @@ function ProblemsPage() {
                     value={form.active ? "1" : "0"}
                     onChange={(event) =>
                       setForm({ ...form, active: event.target.value === "1" })
+                    }
+                    className={inputCls}
+                  >
+                    <option value="1">Да</option>
+                    <option value="0">Не</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="mb-1 block text-sm font-medium text-foreground">
+                    Кредит
+                  </label>
+                  <select
+                    aria-label="Кредит"
+                    value={form.credit ? "1" : "0"}
+                    onChange={(event) =>
+                      setForm({ ...form, credit: event.target.value === "1" })
                     }
                     className={inputCls}
                   >
