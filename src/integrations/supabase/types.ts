@@ -112,6 +112,7 @@ export type Database = {
       problems: {
         Row: {
           active: boolean
+          by_pc: boolean
           comment: string | null
           created_at: string
           credit: boolean
@@ -121,6 +122,7 @@ export type Database = {
         }
         Insert: {
           active?: boolean
+          by_pc?: boolean
           comment?: string | null
           created_at?: string
           credit?: boolean
@@ -130,6 +132,7 @@ export type Database = {
         }
         Update: {
           active?: boolean
+          by_pc?: boolean
           comment?: string | null
           created_at?: string
           credit?: boolean

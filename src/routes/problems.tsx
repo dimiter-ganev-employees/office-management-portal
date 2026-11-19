@@ -38,9 +38,10 @@ type Row = {
   name: string;
   active: boolean;
   credit: boolean;
+  by_pc: boolean;
   comment: string | null;
 };
-type Key = "id" | "name" | "active" | "credit" | "comment";
+type Key = "id" | "name" | "active" | "credit" | "by_pc" | "comment";
 type Dialog =
   | { mode: "add" }
   | { mode: "edit"; row: Row }
@@ -52,12 +53,13 @@ const cols: [Key, string][] = [
   ["name", "Име"],
   ["active", "Активен"],
   ["credit", "Кредит"],
+  ["by_pc", "по PC"],
   ["comment", "Коментар"],
 ];
 const inputCls =
   "w-full rounded-md border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring";
 const text = (row: Row, key: Key) =>
-  key === "active" || key === "credit"
+  key === "active" || key === "credit" || key === "by_pc"
     ? row[key]
       ? "Да"
       : "Не"
@@ -74,6 +76,7 @@ function ProblemsPage() {
     name: "",
     active: "",
     credit: "",
+    by_pc: "",
     comment: "",
   });
   const [dialog, setDialog] = useState<Dialog>(null);
@@ -81,6 +84,7 @@ function ProblemsPage() {
     name: "",
     active: true,
     credit: false,
+    by_pc: false,
     comment: "",
   });
   const [formError, setFormError] = useState<string | null>(null);
@@ -90,7 +94,7 @@ function ProblemsPage() {
     setLoading(true);
     const { data, error: loadError } = await supabase
       .from("problems")
-      .select("id, name, active, credit, comment")
+      .select("id, name, active, credit, by_pc, comment")
       .order("id");
     if (loadError) setError(loadError.message);
     else {
@@ -109,7 +113,7 @@ function ProblemsPage() {
       cols.every(([key]) => {
         const query = filters[key].trim().toLowerCase();
         if (!query) return true;
-        if (key === "active" || key === "credit") {
+        if (key === "active" || key === "credit" || key === "by_pc") {
           const expected =
             query === "1" || query === "да"
               ? "Да"
@@ -124,7 +128,7 @@ function ProblemsPage() {
     const direction = asc ? 1 : -1;
     return [...filtered].sort((a, b) => {
       if (sortKey === "id") return (a.id - b.id) * direction;
-      if (sortKey === "active" || sortKey === "credit")
+      if (sortKey === "active" || sortKey === "credit" || sortKey === "by_pc")
         return (Number(a[sortKey]) - Number(b[sortKey])) * direction;
       return text(a, sortKey).localeCompare(text(b, sortKey), "bg") * direction;
     });
@@ -133,12 +137,19 @@ function ProblemsPage() {
   const open = (nextDialog: NonNullable<Dialog>) => {
     setFormError(null);
     if (nextDialog.mode === "add")
-      setForm({ name: "", active: true, credit: false, comment: "" });
+      setForm({
+        name: "",
+        active: true,
+        credit: false,
+        by_pc: false,
+        comment: "",
+      });
     if (nextDialog.mode === "edit")
       setForm({
         name: nextDialog.row.name,
         active: nextDialog.row.active,
         credit: nextDialog.row.credit,
+        by_pc: nextDialog.row.by_pc,
         comment: nextDialog.row.comment ?? "",
       });
     setDialog(nextDialog);
@@ -152,6 +163,7 @@ function ProblemsPage() {
       name,
       active: form.active,
       credit: form.credit,
+      by_pc: form.by_pc,
       comment: form.comment.trim() || null,
     };
     const result =
@@ -239,7 +251,7 @@ function ProblemsPage() {
             <tr className="border-b bg-muted/20">
               {cols.map(([key]) => (
                 <th key={key} className="px-3 py-2">
-                  {key === "active" || key === "credit" ? (
+                  {key === "active" || key === "credit" || key === "by_pc" ? (
                     <select
                       aria-label={`Филтър по ${
                         cols.find(([column]) => column === key)?.[1]
@@ -248,7 +260,7 @@ function ProblemsPage() {
                       onChange={(event) =>
                         setFilters((current) => ({
                           ...current,
-                          active: event.target.value,
+                          [key]: event.target.value,
                         }))
                       }
                       className="w-full rounded-md border bg-background px-2 py-1 text-xs font-normal text-foreground"
@@ -279,13 +291,13 @@ function ProblemsPage() {
           <tbody>
             {loading ? (
               <tr>
-                <td colSpan={6} className="px-4 py-8 text-center text-muted-foreground">
+                <td colSpan={7} className="px-4 py-8 text-center text-muted-foreground">
                   Зареждане...
                 </td>
               </tr>
             ) : visible.length === 0 ? (
               <tr>
-                <td colSpan={6} className="px-4 py-8 text-center text-muted-foreground">
+                <td colSpan={7} className="px-4 py-8 text-center text-muted-foreground">
                   Няма намерени проблеми.
                 </td>
               </tr>
@@ -314,6 +326,17 @@ function ProblemsPage() {
                       }`}
                     >
                       {row.credit ? "Да" : "Не"}
+                    </span>
+                  </td>
+                  <td className="px-3 py-3">
+                    <span
+                      className={`rounded-full px-2 py-0.5 text-xs font-medium ${
+                        row.by_pc
+                          ? "bg-primary/10 text-primary"
+                          : "bg-muted text-muted-foreground"
+                      }`}
+                    >
+                      {row.by_pc ? "Да" : "Не"}
                     </span>
                   </td>
                   <td className="px-3 py-3 text-muted-foreground">
@@ -451,6 +474,22 @@ function ProblemsPage() {
                     value={form.credit ? "1" : "0"}
                     onChange={(event) =>
                       setForm({ ...form, credit: event.target.value === "1" })
+                    }
+                    className={inputCls}
+                  >
+                    <option value="1">Да</option>
+                    <option value="0">Не</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="mb-1 block text-sm font-medium text-foreground">
+                    по PC
+                  </label>
+                  <select
+                    aria-label="по PC"
+                    value={form.by_pc ? "1" : "0"}
+                    onChange={(event) =>
+                      setForm({ ...form, by_pc: event.target.value === "1" })
                     }
                     className={inputCls}
                   >
