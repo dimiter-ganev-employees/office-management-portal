@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Plus, X } from "lucide-react";
+import { RevisionPanel } from "@/components/RevisionPanel";
 
 export const Route = createFileRoute("/cash")({
   head: () => ({
@@ -87,7 +88,7 @@ function CashPage() {
             </tbody>
           </table>
         </section>
-        <section className="min-h-64 rounded-lg border bg-card p-4" />
+        <RevisionPanel date={dateStr} cashTotal={sum(cash)} />
       </div>
       {adding && <AddDialog date={dateStr} onClose={() => setAdding(false)} onSaved={() => { setAdding(false); void load(); }} />}
     </div>

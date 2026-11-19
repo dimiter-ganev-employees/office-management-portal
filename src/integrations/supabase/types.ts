@@ -139,6 +139,41 @@ export type Database = {
         }
         Relationships: []
       }
+      revisions: {
+        Row: {
+          amount: number
+          created_at: string
+          id: number
+          problem_id: number
+          revision_date: string
+          updated_at: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          id?: number
+          problem_id: number
+          revision_date?: string
+          updated_at?: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          id?: number
+          problem_id?: number
+          revision_date?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "revisions_problem_id_fkey"
+            columns: ["problem_id"]
+            isOneToOne: false
+            referencedRelation: "problems"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
