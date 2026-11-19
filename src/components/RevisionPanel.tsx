@@ -26,10 +26,10 @@ export function RevisionPanel({ date, cashTotal }: { date: string; cashTotal: nu
   const turnover = r2(kasa - s2);
 
   const Total = ({ label, value }: { label: string; value: number }) => (
-    <tr className="border-b bg-muted font-semibold text-foreground"><td colSpan={2} className="py-2 pr-2">{label}</td><td className="py-2 pr-2 text-right">{money(value)}</td><td /></tr>
+    <tr className="border-b bg-muted font-semibold text-foreground"><td colSpan={2} className="py-2 pr-2">{label}</td><td className="py-2 text-right">{money(value)}</td></tr>
   );
   const Row = ({ r }: { r: Rev }) => (
-    <tr className="border-b text-foreground"><td className="py-2 pr-2">{r.id}</td><td className="py-2 pr-2">{r.problems?.name ?? ""}</td><td className="py-2 pr-2 text-right">{money(Number(r.amount))}</td><td className="py-2">{r.revision_date.split("-").reverse().join(".")}</td></tr>
+    <tr className="border-b text-foreground"><td className="py-2 pr-2">{r.id}</td><td className="py-2 pr-2">{r.problems?.name ?? ""}</td><td className="py-2 text-right">{money(Number(r.amount))}</td></tr>
   );
 
   return (
@@ -41,7 +41,7 @@ export function RevisionPanel({ date, cashTotal }: { date: string; cashTotal: nu
       {error && <p className="mb-2 text-sm text-destructive">{error}</p>}
       <table className="w-full text-sm">
         <thead><tr className="border-b text-left text-muted-foreground">
-          <th className="py-2 pr-2">ID</th><th className="py-2 pr-2">Операция</th><th className="py-2 pr-2 text-right">Сума</th><th className="py-2">Дата</th>
+          <th className="py-2 pr-2">ID</th><th className="py-2 pr-2">Операция</th><th className="py-2">Сума</th>
         </tr></thead>
         <tbody>
           {ops1.map((r) => <Row key={r.id} r={r} />)}
