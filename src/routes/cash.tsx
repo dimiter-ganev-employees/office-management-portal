@@ -36,6 +36,7 @@ function CashPage() {
   const [rows, setRows] = useState<Delivery[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [adding, setAdding] = useState(false);
+  const [editing, setEditing] = useState<Delivery | null>(null);
 
   const load = useCallback(async () => {
     const { data, error } = await supabase.from("deliveries").select("id, supplier_id, amount, from_cash, counterparty(name)").eq("delivery_date", dateStr).order("id");
@@ -81,9 +82,9 @@ function CashPage() {
               <th className="py-2 pr-2">ID</th><th className="py-2 pr-2">Доставчик</th><th className="py-2 pr-2 text-right">Сума</th><th className="py-2">От каса</th>
             </tr></thead>
             <tbody>
-              {cash.map((r) => <DRow key={r.id} r={r} />)}
+              {cash.map((r) => <DRow key={r.id} r={r} onEdit={setEditing} />)}
               <tr className="border-b bg-muted font-semibold text-foreground"><td colSpan={2} className="py-2 pr-2">Обща сума от Каса</td><td className="py-2 pr-2 text-right">{money(sum(cash))}</td><td /></tr>
-              {other.map((r) => <DRow key={r.id} r={r} />)}
+              {other.map((r) => <DRow key={r.id} r={r} onEdit={setEditing} />)}
               <tr className="bg-muted font-semibold text-foreground"><td colSpan={2} className="py-2 pr-2">Обща сума от други</td><td className="py-2 pr-2 text-right">{money(sum(other))}</td><td /></tr>
             </tbody>
           </table>
@@ -91,14 +92,15 @@ function CashPage() {
         <RevisionPanel date={dateStr} cashTotal={sum(cash)} />
       </div>
       {adding && <AddDialog date={dateStr} onClose={() => setAdding(false)} onSaved={() => { setAdding(false); void load(); }} />}
+      {editing && <AddDialog date={dateStr} initial={editing} onClose={() => setEditing(null)} onSaved={() => { setEditing(null); void load(); }} />}
     </div>
   );
 }
 
-function DRow({ r }: { r: Delivery }) {
+function DRow({ r, onEdit }: { r: Delivery; onEdit: (r: Delivery) => void }) {
   return (
     <tr className="border-b text-foreground">
-      <td className="py-2 pr-2">{r.id}</td>
+      <td className="py-2 pr-2"><button type="button" title="Редактирай реда" onClick={() => onEdit(r)} className="font-medium text-primary underline-offset-2 hover:underline">{r.id}</button></td>
       <td className="py-2 pr-2">{r.counterparty?.name ?? ""}</td>
       <td className="py-2 pr-2 text-right">{money(Number(r.amount))}</td>
       <td className="py-2">{r.from_cash ? "Да" : "Не"}</td>
@@ -106,22 +108,31 @@ function DRow({ r }: { r: Delivery }) {
   );
 }
 
-function AddDialog({ date, onClose, onSaved }: { date: string; onClose: () => void; onSaved: () => void }) {
+function AddDialog({ date, initial, onClose, onSaved }: { date: string; initial?: Delivery | null; onClose: () => void; onSaved: () => void }) {
   const [suppliers, setSuppliers] = useState<Supplier[]>([]);
-  const [supplier, setSupplier] = useState("");
-  const [amount, setAmount] = useState("");
-  const [fromCash, setFromCash] = useState(true);
+  const [supplier, setSupplier] = useState(initial ? String(initial.supplier_id) : "");
+  const [amount, setAmount] = useState(initial ? String(initial.amount) : "");
+  const [fromCash, setFromCash] = useState(initial ? initial.from_cash : true);
   const [err, setErr] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   useEffect(() => {
-    void supabase.from("counterparty").select("id, name").eq("active", true).order("name").then(({ data }) => setSuppliers(data ?? []));
-  }, []);
+    void supabase.from("counterparty").select("id, name").eq("active", true).order("name").then(({ data }) => {
+      const list = (data ?? []) as Supplier[];
+      if (initial && !list.some((s) => s.id === initial.supplier_id)) {
+        list.push({ id: initial.supplier_id, name: initial.counterparty?.name ?? `#${initial.supplier_id}` });
+      }
+      setSuppliers(list);
+    });
+  }, [initial]);
   const save = async () => {
     const a = Number(amount.replace(",", "."));
     if (!supplier) return setErr("Изберете доставчик.");
     if (!amount.trim() || !Number.isFinite(a)) return setErr("Въведете валидна сума.");
     setSaving(true);
-    const { error } = await supabase.from("deliveries").insert({ delivery_date: date, supplier_id: +supplier, amount: Math.round(a * 100) / 100, from_cash: fromCash });
+    const values = { delivery_date: date, supplier_id: +supplier, amount: Math.round(a * 100) / 100, from_cash: fromCash };
+    const { error } = initial
+      ? await supabase.from("deliveries").update(values).eq("id", initial.id)
+      : await supabase.from("deliveries").insert(values);
     setSaving(false);
     if (error) setErr(error.message); else onSaved();
   };
@@ -129,7 +140,7 @@ function AddDialog({ date, onClose, onSaved }: { date: string; onClose: () => vo
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-foreground/40 p-4">
       <div className="w-full max-w-md rounded-lg border bg-card p-6 shadow-lg">
         <div className="mb-4 flex items-center justify-between">
-          <h3 className="text-lg font-semibold text-foreground">Нова доставка</h3>
+          <h3 className="text-lg font-semibold text-foreground">{initial ? "Редакция на доставка" : "Нова доставка"}</h3>
           <button onClick={onClose} className="text-muted-foreground hover:text-foreground"><X className="h-5 w-5" /></button>
         </div>
         <div className="space-y-3">

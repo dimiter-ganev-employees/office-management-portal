@@ -11,6 +11,7 @@ export function RevisionPanel({ date, cashTotal }: { date: string; cashTotal: nu
   const [rows, setRows] = useState<Rev[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [adding, setAdding] = useState(false);
+  const [editing, setEditing] = useState<Rev | null>(null);
 
   const load = useCallback(async () => {
     const { data, error } = await supabase.from("revisions").select("id, problem_id, amount, revision_date, problems(name, credit)").eq("revision_date", date).order("id");
@@ -29,7 +30,7 @@ export function RevisionPanel({ date, cashTotal }: { date: string; cashTotal: nu
     <tr className="border-b bg-muted font-semibold text-foreground"><td colSpan={2} className="py-2 pr-2">{label}</td><td className="py-2 text-right">{money(value)}</td></tr>
   );
   const Row = ({ r }: { r: Rev }) => (
-    <tr className="border-b text-foreground"><td className="py-2 pr-2">{r.id}</td><td className="py-2 pr-2">{r.problems?.name ?? ""}</td><td className="py-2 text-right">{money(Number(r.amount))}</td></tr>
+    <tr className="border-b text-foreground"><td className="py-2 pr-2"><button type="button" title="Редактирай реда" onClick={() => setEditing(r)} className="font-medium text-primary underline-offset-2 hover:underline">{r.id}</button></td><td className="py-2 pr-2">{r.problems?.name ?? ""}</td><td className="py-2 text-right">{money(Number(r.amount))}</td></tr>
   );
 
   return (
@@ -56,30 +57,40 @@ export function RevisionPanel({ date, cashTotal }: { date: string; cashTotal: nu
         </tbody>
       </table>
       {adding && <AddDialog date={date} onClose={() => setAdding(false)} onSaved={() => { setAdding(false); void load(); }} />}
+      {editing && <AddDialog date={date} initial={editing} onClose={() => setEditing(null)} onSaved={() => { setEditing(null); void load(); }} />}
     </section>
   );
 }
 
-function AddDialog({ date, onClose, onSaved }: { date: string; onClose: () => void; onSaved: () => void }) {
+function AddDialog({ date, initial, onClose, onSaved }: { date: string; initial?: Rev | null; onClose: () => void; onSaved: () => void }) {
   const today = new Date();
   const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
   const [problems, setProblems] = useState<{ id: number; name: string }[]>([]);
-  const [problem, setProblem] = useState("");
-  const [amount, setAmount] = useState("");
-  const [revDate, setRevDate] = useState(todayStr);
+  const [problem, setProblem] = useState(initial ? String(initial.problem_id) : "");
+  const [amount, setAmount] = useState(initial ? String(initial.amount) : "");
+  const [revDate, setRevDate] = useState(initial ? initial.revision_date : todayStr);
   const [err, setErr] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   void date;
   useEffect(() => {
-    void supabase.from("problems").select("id, name").eq("active", true).order("name").then(({ data }) => setProblems(data ?? []));
-  }, []);
+    void supabase.from("problems").select("id, name").eq("active", true).order("name").then(({ data }) => {
+      const list = (data ?? []) as { id: number; name: string }[];
+      if (initial && !list.some((p) => p.id === initial.problem_id)) {
+        list.push({ id: initial.problem_id, name: initial.problems?.name ?? `#${initial.problem_id}` });
+      }
+      setProblems(list);
+    });
+  }, [initial]);
   const save = async () => {
     const a = Number(amount.replace(",", "."));
     if (!problem) return setErr("Изберете операция.");
     if (!amount.trim() || !Number.isFinite(a)) return setErr("Въведете валидна сума.");
     if (!revDate) return setErr("Въведете дата.");
     setSaving(true);
-    const { error } = await supabase.from("revisions").insert({ problem_id: +problem, amount: r2(a), revision_date: revDate });
+    const values = { problem_id: +problem, amount: r2(a), revision_date: revDate };
+    const { error } = initial
+      ? await supabase.from("revisions").update(values).eq("id", initial.id)
+      : await supabase.from("revisions").insert(values);
     setSaving(false);
     if (error) setErr(error.message); else onSaved();
   };
@@ -87,7 +98,7 @@ function AddDialog({ date, onClose, onSaved }: { date: string; onClose: () => vo
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-foreground/40 p-4">
       <div className="w-full max-w-md rounded-lg border bg-card p-6 shadow-lg">
         <div className="mb-4 flex items-center justify-between">
-          <h3 className="text-lg font-semibold text-foreground">Нова ревизия</h3>
+          <h3 className="text-lg font-semibold text-foreground">{initial ? "Редакция на ревизия" : "Нова ревизия"}</h3>
           <button onClick={onClose} className="text-muted-foreground hover:text-foreground"><X className="h-5 w-5" /></button>
         </div>
         <div className="space-y-3">
