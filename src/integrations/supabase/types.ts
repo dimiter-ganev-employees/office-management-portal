@@ -118,6 +118,7 @@ export type Database = {
           credit: boolean
           id: number
           name: string
+          post_terminal: boolean
           updated_at: string
         }
         Insert: {
@@ -128,6 +129,7 @@ export type Database = {
           credit?: boolean
           id?: number
           name: string
+          post_terminal?: boolean
           updated_at?: string
         }
         Update: {
@@ -138,6 +140,7 @@ export type Database = {
           credit?: boolean
           id?: number
           name?: string
+          post_terminal?: boolean
           updated_at?: string
         }
         Relationships: []

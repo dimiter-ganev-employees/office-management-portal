@@ -39,9 +39,10 @@ type Row = {
   active: boolean;
   credit: boolean;
   by_pc: boolean;
+  post_terminal: boolean;
   comment: string | null;
 };
-type Key = "id" | "name" | "active" | "credit" | "by_pc" | "comment";
+type Key = "id" | "name" | "active" | "credit" | "by_pc" | "post_terminal" | "comment";
 type Dialog =
   | { mode: "add" }
   | { mode: "edit"; row: Row }
@@ -54,12 +55,16 @@ const cols: [Key, string][] = [
   ["active", "Активен"],
   ["credit", "Кредит"],
   ["by_pc", "по PC"],
+  ["post_terminal", "Пост Терминал"],
   ["comment", "Коментар"],
 ];
 const inputCls =
   "w-full rounded-md border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring";
 const text = (row: Row, key: Key) =>
-  key === "active" || key === "credit" || key === "by_pc"
+  key === "active" ||
+  key === "credit" ||
+  key === "by_pc" ||
+  key === "post_terminal"
     ? row[key]
       ? "Да"
       : "Не"
@@ -77,6 +82,7 @@ function ProblemsPage() {
     active: "",
     credit: "",
     by_pc: "",
+    post_terminal: "",
     comment: "",
   });
   const [dialog, setDialog] = useState<Dialog>(null);
@@ -85,6 +91,7 @@ function ProblemsPage() {
     active: true,
     credit: false,
     by_pc: false,
+    post_terminal: false,
     comment: "",
   });
   const [formError, setFormError] = useState<string | null>(null);
@@ -94,7 +101,7 @@ function ProblemsPage() {
     setLoading(true);
     const { data, error: loadError } = await supabase
       .from("problems")
-      .select("id, name, active, credit, by_pc, comment")
+      .select("id, name, active, credit, by_pc, post_terminal, comment")
       .order("id");
     if (loadError) setError(loadError.message);
     else {
@@ -113,7 +120,12 @@ function ProblemsPage() {
       cols.every(([key]) => {
         const query = filters[key].trim().toLowerCase();
         if (!query) return true;
-        if (key === "active" || key === "credit" || key === "by_pc") {
+        if (
+          key === "active" ||
+          key === "credit" ||
+          key === "by_pc" ||
+          key === "post_terminal"
+        ) {
           const expected =
             query === "1" || query === "да"
               ? "Да"
@@ -128,7 +140,12 @@ function ProblemsPage() {
     const direction = asc ? 1 : -1;
     return [...filtered].sort((a, b) => {
       if (sortKey === "id") return (a.id - b.id) * direction;
-      if (sortKey === "active" || sortKey === "credit" || sortKey === "by_pc")
+      if (
+        sortKey === "active" ||
+        sortKey === "credit" ||
+        sortKey === "by_pc" ||
+        sortKey === "post_terminal"
+      )
         return (Number(a[sortKey]) - Number(b[sortKey])) * direction;
       return text(a, sortKey).localeCompare(text(b, sortKey), "bg") * direction;
     });
@@ -142,6 +159,7 @@ function ProblemsPage() {
         active: true,
         credit: false,
         by_pc: false,
+        post_terminal: false,
         comment: "",
       });
     if (nextDialog.mode === "edit")
@@ -150,6 +168,7 @@ function ProblemsPage() {
         active: nextDialog.row.active,
         credit: nextDialog.row.credit,
         by_pc: nextDialog.row.by_pc,
+        post_terminal: nextDialog.row.post_terminal,
         comment: nextDialog.row.comment ?? "",
       });
     setDialog(nextDialog);
@@ -164,6 +183,7 @@ function ProblemsPage() {
       active: form.active,
       credit: form.credit,
       by_pc: form.by_pc,
+      post_terminal: form.post_terminal,
       comment: form.comment.trim() || null,
     };
     const result =
@@ -251,7 +271,10 @@ function ProblemsPage() {
             <tr className="border-b bg-muted/20">
               {cols.map(([key]) => (
                 <th key={key} className="px-3 py-2">
-                  {key === "active" || key === "credit" || key === "by_pc" ? (
+                  {key === "active" ||
+                  key === "credit" ||
+                  key === "by_pc" ||
+                  key === "post_terminal" ? (
                     <select
                       aria-label={`Филтър по ${
                         cols.find(([column]) => column === key)?.[1]
@@ -291,13 +314,13 @@ function ProblemsPage() {
           <tbody>
             {loading ? (
               <tr>
-                <td colSpan={7} className="px-4 py-8 text-center text-muted-foreground">
+                <td colSpan={8} className="px-4 py-8 text-center text-muted-foreground">
                   Зареждане...
                 </td>
               </tr>
             ) : visible.length === 0 ? (
               <tr>
-                <td colSpan={7} className="px-4 py-8 text-center text-muted-foreground">
+                <td colSpan={8} className="px-4 py-8 text-center text-muted-foreground">
                   Няма намерени проблеми.
                 </td>
               </tr>
@@ -337,6 +360,17 @@ function ProblemsPage() {
                       }`}
                     >
                       {row.by_pc ? "Да" : "Не"}
+                    </span>
+                  </td>
+                  <td className="px-3 py-3">
+                    <span
+                      className={`rounded-full px-2 py-0.5 text-xs font-medium ${
+                        row.post_terminal
+                          ? "bg-primary/10 text-primary"
+                          : "bg-muted text-muted-foreground"
+                      }`}
+                    >
+                      {row.post_terminal ? "Да" : "Не"}
                     </span>
                   </td>
                   <td className="px-3 py-3 text-muted-foreground">
@@ -490,6 +524,25 @@ function ProblemsPage() {
                     value={form.by_pc ? "1" : "0"}
                     onChange={(event) =>
                       setForm({ ...form, by_pc: event.target.value === "1" })
+                    }
+                    className={inputCls}
+                  >
+                    <option value="1">Да</option>
+                    <option value="0">Не</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="mb-1 block text-sm font-medium text-foreground">
+                    Пост Терминал
+                  </label>
+                  <select
+                    aria-label="Пост Терминал"
+                    value={form.post_terminal ? "1" : "0"}
+                    onChange={(event) =>
+                      setForm({
+                        ...form,
+                        post_terminal: event.target.value === "1",
+                      })
                     }
                     className={inputCls}
                   >
