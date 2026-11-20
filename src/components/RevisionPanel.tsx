@@ -4,8 +4,8 @@ import { Plus, X } from "lucide-react";
 
 type Prob = { name: string; credit: boolean; by_pc: boolean; post_terminal: boolean };
 type Rev = { id: number; problem_id: number; amount: number; revision_date: string; problems: Prob | null };
-// Проблем с „по PC“ = Не (0) и „Пост Терминал“ = Да (1) не се използват в Ревизия.
-const isExcluded = (p: Prob | null) => !!p && p.by_pc === false && p.post_terminal === true;
+// Проблем с „по PC“ = Не (0) или „Пост Терминал“ = Да (1) не се използват в Ревизия.
+const isExcluded = (p: Prob | null) => !!p && (p.by_pc === false || p.post_terminal === true);
 const inputCls = "rounded-md border bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring";
 const money = (n: number) => n.toLocaleString("bg-BG", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 const r2 = (n: number) => Math.round(n * 100) / 100;
@@ -76,7 +76,7 @@ function AddDialog({ date, initial, onClose, onSaved }: { date: string; initial?
   const [saving, setSaving] = useState(false);
   void date;
   useEffect(() => {
-    void supabase.from("problems").select("id, name").eq("active", true).or("by_pc.eq.true,post_terminal.eq.false").order("name").then(({ data }) => {
+    void supabase.from("problems").select("id, name").eq("active", true).eq("by_pc", true).eq("post_terminal", false).order("name").then(({ data }) => {
       const list = (data ?? []) as { id: number; name: string }[];
       if (initial && !list.some((p) => p.id === initial.problem_id)) {
         list.push({ id: initial.problem_id, name: initial.problems?.name ?? `#${initial.problem_id}` });
