@@ -58,7 +58,7 @@ export function RevisionPanel({ date, cashTotal }: { date: string; cashTotal: nu
           <Total label="Оборот" value={turnover} highlighted />
           {pcRows.map((r) => <Row key={`pc-${r.id}`} r={r} />)}
           <Total label="Обща сума по PC" value={pcTotal} />
-          <Total label="Разлика" value={calculateRevisionDifference(turnover, pcTotal)} />
+          <Total label="Разлика" value={calculateRevisionDifference(turnover, pcTotal)} highlighted />
         </tbody>
       </table>
       {adding && <AddDialog date={date} onClose={() => setAdding(false)} onSaved={() => { setAdding(false); void load(); }} />}
