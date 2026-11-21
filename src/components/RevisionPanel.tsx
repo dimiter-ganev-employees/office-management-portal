@@ -78,7 +78,7 @@ function AddDialog({ date, initial, onClose, onSaved }: { date: string; initial?
   const [saving, setSaving] = useState(false);
   void date;
   useEffect(() => {
-    void supabase.from("problems").select("id, name").eq("active", true).eq("by_pc", false).eq("post_terminal", false).order("name").then(({ data }) => {
+    void supabase.from("problems").select("id, name").eq("active", true).order("name").then(({ data }) => {
       const list = (data ?? []) as { id: number; name: string }[];
       if (initial && !list.some((p) => p.id === initial.problem_id)) {
         list.push({ id: initial.problem_id, name: initial.problems?.name ?? `#${initial.problem_id}` });
