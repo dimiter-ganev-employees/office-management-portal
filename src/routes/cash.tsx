@@ -3,6 +3,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Plus, X } from "lucide-react";
 import { RevisionPanel } from "@/components/RevisionPanel";
+import { PostTerminalSummary } from "@/components/PostTerminalSummary";
 
 export const Route = createFileRoute("/cash")({
   head: () => ({
@@ -70,6 +71,7 @@ function CashPage() {
           </select>
         </label>
       </div>
+      <PostTerminalSummary date={dateStr} />
       <div className="grid gap-4 md:grid-cols-2">
         <section className="rounded-lg border bg-card p-4">
           <div className="mb-3 flex items-center justify-between">

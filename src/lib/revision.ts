@@ -29,3 +29,10 @@ export const sumRevisionRows = (rows: RevisionRow[]) =>
 
 export const calculateRevisionDifference = (turnover: number, pcTotal: number) =>
   Math.round((turnover - pcTotal) * 100) / 100;
+
+export function getPostTerminalSummary(rows: RevisionRow[]) {
+  return {
+    postTerminalReport: sumRevisionRows(rows.filter((row) => row.problems?.post_terminal === true)),
+    postTerminal: sumRevisionRows(rows.filter((row) => row.problems?.name === "Пост терминал")),
+  };
+}

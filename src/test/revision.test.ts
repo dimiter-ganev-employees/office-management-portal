@@ -1,13 +1,13 @@
 import { describe, expect, it } from "vitest";
 
-import { calculateRevisionDifference, partitionRevisionRows, sumRevisionRows, type RevisionRow } from "@/lib/revision";
+import { calculateRevisionDifference, getPostTerminalSummary, partitionRevisionRows, sumRevisionRows, type RevisionRow } from "@/lib/revision";
 
-const row = (id: number, amount: number, byPc: boolean, postTerminal = false): RevisionRow => ({
+const row = (id: number, amount: number, byPc: boolean, postTerminal = false, name = `Операция ${id}`): RevisionRow => ({
   id,
   problem_id: id,
   amount,
   revision_date: "2026-11-21",
-  problems: { name: `Операция ${id}`, credit: false, by_pc: byPc, post_terminal: postTerminal },
+  problems: { name, credit: false, by_pc: byPc, post_terminal: postTerminal },
 });
 
 describe("Ревизия — операции по PC", () => {
@@ -31,5 +31,16 @@ describe("Ревизия — операции по PC", () => {
 
   it("изчислява Разлика като Оборот минус Обща сума по PC", () => {
     expect(calculateRevisionDifference(75, 4)).toBe(71);
+  });
+
+  it("събира отделно сумите с Пост Терминал = Да и с име Пост терминал", () => {
+    const summary = getPostTerminalSummary([
+      row(1, 73, false, true, "Сптавка Пост терминал"),
+      row(2, 70, false, false, "Пост терминал"),
+      row(3, 20, false, false, "Кашони"),
+    ]);
+
+    expect(summary.postTerminalReport).toBe(73);
+    expect(summary.postTerminal).toBe(70);
   });
 });
