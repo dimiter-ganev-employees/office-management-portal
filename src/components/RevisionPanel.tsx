@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { partitionRevisionRows, sumRevisionRows, type RevisionRow } from "@/lib/revision";
+import { calculateRevisionDifference, partitionRevisionRows, sumRevisionRows, type RevisionRow } from "@/lib/revision";
 import { Plus, X } from "lucide-react";
 
 type Rev = RevisionRow;
@@ -58,6 +58,7 @@ export function RevisionPanel({ date, cashTotal }: { date: string; cashTotal: nu
           <Total label="Оборот" value={turnover} />
           {pcRows.map((r) => <Row key={`pc-${r.id}`} r={r} />)}
           <Total label="Обща сума по PC" value={pcTotal} />
+          <Total label="Разлика" value={calculateRevisionDifference(turnover, pcTotal)} />
         </tbody>
       </table>
       {adding && <AddDialog date={date} onClose={() => setAdding(false)} onSaved={() => { setAdding(false); void load(); }} />}

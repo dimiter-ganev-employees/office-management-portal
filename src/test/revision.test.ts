@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { partitionRevisionRows, sumRevisionRows, type RevisionRow } from "@/lib/revision";
+import { calculateRevisionDifference, partitionRevisionRows, sumRevisionRows, type RevisionRow } from "@/lib/revision";
 
 const row = (id: number, amount: number, byPc: boolean, postTerminal = false): RevisionRow => ({
   id,
@@ -27,5 +27,9 @@ describe("Ревизия — операции по PC", () => {
     const { pcRows } = partitionRevisionRows([row(1, 100.25, true), row(2, 25.1, true), row(3, 999, false)]);
 
     expect(sumRevisionRows(pcRows)).toBe(125.35);
+  });
+
+  it("изчислява Разлика като Оборот минус Обща сума по PC", () => {
+    expect(calculateRevisionDifference(75, 4)).toBe(71);
   });
 });

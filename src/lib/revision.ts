@@ -26,3 +26,6 @@ export function partitionRevisionRows(rows: RevisionRow[]) {
 
 export const sumRevisionRows = (rows: RevisionRow[]) =>
   Math.round(rows.reduce((sum, row) => sum + Number(row.amount), 0) * 100) / 100;
+
+export const calculateRevisionDifference = (turnover: number, pcTotal: number) =>
+  Math.round((turnover - pcTotal) * 100) / 100;
