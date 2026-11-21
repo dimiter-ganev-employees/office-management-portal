@@ -1,11 +1,9 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { partitionRevisionRows, sumRevisionRows, type RevisionRow } from "@/lib/revision";
 import { Plus, X } from "lucide-react";
 
-type Prob = { name: string; credit: boolean; by_pc: boolean; post_terminal: boolean };
-type Rev = { id: number; problem_id: number; amount: number; revision_date: string; problems: Prob | null };
-// Проблем с „по PC“ = Да (1) или „Пост Терминал“ = Да (1) не се използват в Ревизия.
-const isExcluded = (p: Prob | null) => !!p && (p.by_pc === true || p.post_terminal === true);
+type Rev = RevisionRow;
 const inputCls = "rounded-md border bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring";
 const money = (n: number) => n.toLocaleString("bg-BG", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 const r2 = (n: number) => Math.round(n * 100) / 100;
@@ -18,16 +16,17 @@ export function RevisionPanel({ date, cashTotal }: { date: string; cashTotal: nu
 
   const load = useCallback(async () => {
     const { data, error } = await supabase.from("revisions").select("id, problem_id, amount, revision_date, problems(name, credit, by_pc, post_terminal)").eq("revision_date", date).order("id");
-    if (error) setError(error.message); else { setError(null); setRows(((data ?? []) as unknown as Rev[]).filter((r) => !isExcluded(r.problems))); }
+    if (error) setError(error.message); else { setError(null); setRows((data ?? []) as unknown as Rev[]); }
   }, [date]);
   useEffect(() => { void load(); }, [load]);
 
-  const ops1 = useMemo(() => rows.filter((r) => r.problems?.credit), [rows]);
-  const ops2 = useMemo(() => rows.filter((r) => !r.problems?.credit), [rows]);
-  const sum = (l: Rev[]) => r2(l.reduce((s, r) => s + Number(r.amount), 0));
-  const s1 = sum(ops1), s2 = sum(ops2);
+  const { standardRows, pcRows } = useMemo(() => partitionRevisionRows(rows), [rows]);
+  const ops1 = useMemo(() => standardRows.filter((r) => r.problems?.credit), [standardRows]);
+  const ops2 = useMemo(() => standardRows.filter((r) => !r.problems?.credit), [standardRows]);
+  const s1 = sumRevisionRows(ops1), s2 = sumRevisionRows(ops2);
   const kasa = r2(s1 + cashTotal);
   const turnover = r2(kasa - s2);
+  const pcTotal = sumRevisionRows(pcRows);
 
   const Total = ({ label, value }: { label: string; value: number }) => (
     <tr className="border-b bg-muted font-semibold text-foreground"><td colSpan={2} className="py-2 pr-2">{label}</td><td className="py-2 text-right">{money(value)}</td></tr>
@@ -57,6 +56,8 @@ export function RevisionPanel({ date, cashTotal }: { date: string; cashTotal: nu
           <Total label="Обща Сума от Каса" value={kasa} />
           <Total label="Обща сума Операции2" value={r2(-s2)} />
           <Total label="Оборот" value={turnover} />
+          {pcRows.map((r) => <Row key={`pc-${r.id}`} r={r} />)}
+          <Total label="Обща сума по PC" value={pcTotal} />
         </tbody>
       </table>
       {adding && <AddDialog date={date} onClose={() => setAdding(false)} onSaved={() => { setAdding(false); void load(); }} />}
