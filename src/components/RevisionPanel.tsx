@@ -28,8 +28,8 @@ export function RevisionPanel({ date, cashTotal }: { date: string; cashTotal: nu
   const turnover = r2(kasa - s2);
   const pcTotal = sumRevisionRows(pcRows);
 
-  const Total = ({ label, value }: { label: string; value: number }) => (
-    <tr className="border-b bg-muted font-semibold text-foreground"><td colSpan={2} className="py-2 pr-2">{label}</td><td className="py-2 text-right">{money(value)}</td></tr>
+  const Total = ({ label, value, highlighted = false }: { label: string; value: number; highlighted?: boolean }) => (
+    <tr className={`border-b font-semibold text-foreground ${highlighted ? "bg-success" : "bg-muted"}`}><td colSpan={2} className="py-2 pr-2">{label}</td><td className="py-2 text-right">{money(value)}</td></tr>
   );
   const Row = ({ r }: { r: Rev }) => (
     <tr className="border-b text-foreground"><td className="py-2 pr-2"><button type="button" title="Редактирай реда" onClick={() => setEditing(r)} className="font-medium text-primary underline-offset-2 hover:underline">{r.id}</button></td><td className="py-2 pr-2">{r.problems?.name ?? ""}</td><td className="py-2 text-right">{money(Number(r.amount))}</td></tr>
@@ -51,11 +51,11 @@ export function RevisionPanel({ date, cashTotal }: { date: string; cashTotal: nu
           <Total label="Обща сума Операции1" value={s1} />
           {ops2.map((r) => <Row key={r.id} r={r} />)}
           <Total label="Обща сума Операции2" value={s2} />
-          <Total label="Обща сума Операции1" value={s1} />
-          <Total label="Обща Сума Доставки" value={cashTotal} />
-          <Total label="Обща Сума от Каса" value={kasa} />
-          <Total label="Обща сума Операции2" value={r2(-s2)} />
-          <Total label="Оборот" value={turnover} />
+          <Total label="Обща сума Операции1" value={s1} highlighted />
+          <Total label="Обща Сума Доставки" value={cashTotal} highlighted />
+          <Total label="Обща Сума от Каса" value={kasa} highlighted />
+          <Total label="Обща сума Операции2" value={r2(-s2)} highlighted />
+          <Total label="Оборот" value={turnover} highlighted />
           {pcRows.map((r) => <Row key={`pc-${r.id}`} r={r} />)}
           <Total label="Обща сума по PC" value={pcTotal} />
           <Total label="Разлика" value={calculateRevisionDifference(turnover, pcTotal)} />
