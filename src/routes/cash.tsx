@@ -19,7 +19,7 @@ export const Route = createFileRoute("/cash")({
   component: CashPage,
 });
 
-type Delivery = { id: number; supplier_id: number; amount: number; from_cash: boolean; counterparty: { name: string } | null };
+type Delivery = { id: number; supplier_id: number; amount: number; from_cash: boolean; delivery_date: string; counterparty: { name: string } | null };
 type Supplier = { id: number; name: string };
 const inputCls = "rounded-md border bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring";
 const money = (n: number) => n.toLocaleString("bg-BG", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
@@ -40,7 +40,7 @@ function CashPage() {
   const [editing, setEditing] = useState<Delivery | null>(null);
 
   const load = useCallback(async () => {
-    const { data, error } = await supabase.from("deliveries").select("id, supplier_id, amount, from_cash, counterparty(name)").eq("delivery_date", dateStr).order("id");
+    const { data, error } = await supabase.from("deliveries").select("id, supplier_id, amount, from_cash, delivery_date, counterparty(name)").eq("delivery_date", dateStr).order("id");
     if (error) setError(error.message); else { setError(null); setRows((data ?? []) as unknown as Delivery[]); }
   }, [dateStr]);
   useEffect(() => { void load(); }, [load]);
@@ -115,6 +115,7 @@ function AddDialog({ date, initial, onClose, onSaved }: { date: string; initial?
   const [supplier, setSupplier] = useState(initial ? String(initial.supplier_id) : "");
   const [amount, setAmount] = useState(initial ? String(initial.amount) : "");
   const [fromCash, setFromCash] = useState(initial ? initial.from_cash : true);
+  const [delDate, setDelDate] = useState(initial ? initial.delivery_date : date);
   const [err, setErr] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   useEffect(() => {
@@ -130,8 +131,9 @@ function AddDialog({ date, initial, onClose, onSaved }: { date: string; initial?
     const a = Number(amount.replace(",", "."));
     if (!supplier) return setErr("Изберете доставчик.");
     if (!amount.trim() || !Number.isFinite(a)) return setErr("Въведете валидна сума.");
+    if (!delDate) return setErr("Въведете дата.");
     setSaving(true);
-    const values = { delivery_date: date, supplier_id: +supplier, amount: Math.round(a * 100) / 100, from_cash: fromCash };
+    const values = { delivery_date: delDate, supplier_id: +supplier, amount: Math.round(a * 100) / 100, from_cash: fromCash };
     const { error } = initial
       ? await supabase.from("deliveries").update(values).eq("id", initial.id)
       : await supabase.from("deliveries").insert(values);
@@ -159,6 +161,9 @@ function AddDialog({ date, initial, onClose, onSaved }: { date: string; initial?
             <select className={`${inputCls} mt-1 w-full`} value={fromCash ? "1" : "0"} onChange={(e) => setFromCash(e.target.value === "1")}>
               <option value="1">Да</option><option value="0">Не</option>
             </select>
+          </label>
+          <label className="block text-sm text-foreground">Дата *
+            <input type="date" className={`${inputCls} mt-1 w-full`} value={delDate} onChange={(e) => setDelDate(e.target.value)} />
           </label>
           {err && <p className="text-sm text-destructive">{err}</p>}
         </div>
